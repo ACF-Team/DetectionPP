@@ -1,5 +1,7 @@
 -- Just replicating CPPI a little bit here as a future proofing sort of thing
 -- (I'm sure someone will tell me this is excessive and I'll agree later)
+local ENTITY = FindMetaTable("Entity")
+
 DPPI = {}
 function DPPI:GetName() return "Detection Prop Protection by the ACF Team" end
 function DPPI:GetVersion() return "1.0" end

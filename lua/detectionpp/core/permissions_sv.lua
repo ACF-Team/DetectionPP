@@ -77,9 +77,10 @@ function DetectionPP.Player1AllowsPlayer2(Player1, Player2)
 end
 
 -- Checks if the player can detect this entity.
+local CAN_ALWAYS_DETECT_WORLD = true -- Only set to false when testing.
 function DetectionPP.PlayerCanDetect(Player, Entity)
     -- Allow everyone to detect worldspawn
-    if ENTITY.IsWorld(Entity) then return true end
+    if ENTITY.IsWorld(Entity) then return CAN_ALWAYS_DETECT_WORLD end
 
     -- Different type of check for players
     if ENTITY.IsPlayer(Entity) then
