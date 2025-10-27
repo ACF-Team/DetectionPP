@@ -1,7 +1,9 @@
+function DetectionPP.Default() return nil end
 function DetectionPP.DefaultVector() return Vector(0, 0, 0) end
 function DetectionPP.DefaultAngle() return Angle(0, 0, 0) end
 function DetectionPP.DefaultVectorAngle() return Vector(0, 0, 0), Angle(0, 0, 0) end
 function DetectionPP.DefaultEntity() return NULL end
+function DetectionPP.DefaultPhysicsObject() return nil end
 function DetectionPP.DefaultNumber() return 0 end
 function DetectionPP.DefaultString() return "" end
 function DetectionPP.DefaultTable() return {} end

@@ -5,7 +5,7 @@ local function DetourE(E2Sig, Default, Post)
         if DetectionPP.CantDetect(Args[1], Scope.player) then
             return Default()
         end
-        return Post and Post(Func(Scope, Args, ...)) or Func(Scope, Args, ...)
+        return Post and Post(Scope.player, Func(Scope, Args, ...)) or Func(Scope, Args, ...)
     end)
 end
 
@@ -18,8 +18,8 @@ local function DetourB(E2Sig, Default)
     end)
 end
 
-local function TrashTrace(Ranger)
-    if IsValid(Ranger.Entity) and DetectionPP.CantDetect(Ranger.Entity) then
+local function TrashTrace(Player, Ranger)
+    if IsValid(Ranger.Entity) and DetectionPP.CantDetect(Ranger.Entity, Player) then
         DetectionPP.DefaultTrace(Ranger, NULL)
     end
 
@@ -70,6 +70,9 @@ DetourE("e:attachmentPos(n)", DetectionPP.DefaultVector)
 DetourE("e:attachmentPos(s)", DetectionPP.DefaultVector)
 DetourE("e:bearing(v)", DetectionPP.DefaultNumber)
 DetourE("e:boxCenter()", DetectionPP.DefaultVector)
+DetourE("e:bone(n)", DetectionPP.DefaultPhysicsObject)
+DetourE("e:boneCount()", DetectionPP.DefaultNumber)
+DetourE("e:bones()", DetectionPP.DefaultTable)
 DetourE("e:boxCenterW()", DetectionPP.DefaultVector)
 DetourE("e:boxMax()", DetectionPP.DefaultVector)
 DetourE("e:boxMin()", DetectionPP.DefaultVector)
@@ -79,5 +82,13 @@ DetourE("e:driver()", DetectionPP.DefaultEntity)
 DetourE("e:eye()", DetectionPP.DefaultVector)
 DetourE("e:eyeAngles()", DetectionPP.DefaultAngle)
 DetourE("e:eyeAnglesVehicle()", DetectionPP.DefaultAngle)
-DetourE("e:eyeTrace()", DetectionPP.DefaultAngle, TrashTrace)
-DetourE("e:eyeTraceCursor()", DetectionPP.DefaultAngle, TrashTrace)
+DetourE("e:eyeTrace()", DetectionPP.DefaultTrace, TrashTrace)
+DetourE("e:eyeTraceCursor()", DetectionPP.DefaultTrace, TrashTrace)
+DetourE("e:forward()", DetectionPP.DefaultVector)
+DetourE("e:frictionSnapshot()", DetectionPP.DefaultTable)
+DetourE("e:friends()", DetectionPP.DefaultTable)
+DetourE("e:fromModelBone(n)", DetectionPP.DefaultPhysicsObject)
+DetourE("e:getConnectedEntities(r)", DetectionPP.DefaultTable)
+DetourE("e:getConnectedEntities(...)", DetectionPP.DefaultTable)
+DetourE("e:getConstraints()", DetectionPP.DefaultTable)
+DetourE("e:getContraption()", DetectionPP.Default)

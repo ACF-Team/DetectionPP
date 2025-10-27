@@ -21,7 +21,7 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     local vwrap, _           = Instance.Types.Vector.Wrap, Instance.Types.Vector.Unwrap
     local awrap, _           = Instance.Types.Angle.Wrap, Instance.Types.Angle.Unwrap
     local mwrap, _           = Instance.Types.VMatrix.Wrap, Instance.Types.VMatrix.Unwrap
-    local cwrap, _           = Instance.Types.Color.Wrap, Instance.Types.Color.Unwrap
+    -- local cwrap, _           = Instance.Types.Color.Wrap, Instance.Types.Color.Unwrap
     local pwrap, punwrap     = Instance.Types.PhysObj.Wrap, Instance.Types.PhysObj.Unwrap
     local wwrap, wunwrap           = Instance.Types.Weapon.Wrap, Instance.Types.Weapon.Unwrap
     local quat_meta = Instance.Types.Quaternion
@@ -49,14 +49,14 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     local DEFAULT_PLAYER        = function() return plywrap(NULL) end
     local DEFAULT_WEAPON        = function() return wwrap(NULL) end
     local DEFAULT_VEHICLE        = function() return vehwrap(NULL) end
-    local DEFAULT_COLOR         = function() return cwrap(Color(0, 0, 0, 0)) end
+    -- local DEFAULT_COLOR         = function() return cwrap(Color(0, 0, 0, 0)) end
     local DEFAULT_VECTOR        = function() return vwrap(Vector(0, 0, 0)) end
     local DEFAULT_ANGLE         = function() return awrap(Angle(0, 0, 0)) end
     local DEFAULT_VECTOR_ANGLE  = function() return vwrap(Vector(0, 0, 0)), awrap(Angle(0, 0, 0)) end
     local DEFAULT_VECTOR_VECTOR = function() return vwrap(Vector(0, 0, 0)), vwrap(Vector(0, 0, 0)) end
     local DEFAULT_MATRIX        = function() return mwrap(Matrix()) end
     local DEFAULT_QUATERNION    = function() return qwrap{0, 0, 0, 0} end
-    local DEFAULT_PHYSOBJ       = function() return pwrap(NULL) end
+    local DEFAULT_PHYSOBJ       = function() return pwrap(nil) end
     local DEFAULT_BOOL          = function() return false end
 
     local function TrashTrace(Trace)
@@ -71,12 +71,12 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     local function DetourEntMethodReturningNil(Method, Cond)          DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_NIL, Cond) end
     local function DetourEntMethodReturningEmptyTable(Method, Cond)   DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_EMPTY_TABLE, Cond) end
     local function DetourEntMethodReturningNumber(Method, Cond)       DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_NUMBER, Cond) end
-    local function DetourEntMethodReturning0000(Method, Cond)         DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, function() return 0,0,0,0 end, Cond) end
+    -- local function DetourEntMethodReturning0000(Method, Cond)         DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, function() return 0,0,0,0 end, Cond) end
     local function DetourEntMethodReturningNeg1(Method, Cond)         DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_NEG1, Cond) end
     local function DetourEntMethodReturningString(Method, Cond)       DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_STRING, Cond) end
     local function DetourEntMethodReturningAngle(Method, Cond)        DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_ANGLE, Cond) end
     local function DetourEntMethodReturningVector(Method, Cond)       DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_VECTOR, Cond) end
-    local function DetourEntMethodReturningColor(Method, Cond)        DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_COLOR, Cond) end
+    -- local function DetourEntMethodReturningColor(Method, Cond)        DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_COLOR, Cond) end
     local function DetourEntMethodReturningMatrix(Method, Cond)       DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_MATRIX, Cond) end
     local function DetourEntMethodReturningEntity(Method, Cond)       DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_ENTITY, Cond) end
     local function DetourEntMethodReturningPhysObj(Method, Cond)      DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_PHYSOBJ, Cond) end
@@ -191,8 +191,6 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     DetourEntMethodReturningEmptyTable("getClipping")
     DetourEntMethodReturningVectorVector("getCollisionBounds")
     DetourEntMethodReturningNumber("getCollisionGroup")
-    DetourEntMethodReturningColor("getColor")
-    DetourEntMethodReturning0000("getColor4Part")
     DetourEntMethodReturningNil("getDTAngle")
     DetourEntMethodReturningNil("getDTBool")
     DetourEntMethodReturningNil("getDTEntity")
