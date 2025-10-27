@@ -2,7 +2,7 @@ local FILE_NAME = "detectionpp_config.json"
 
 local ENTITY = FindMetaTable("Entity")
 
-local DPP_Enabled = CreateConVar("detectionpp_enabled", "1", bit.bor(FCVAR_ARCHIVE, FCVAR_NOTIFY), "Enables/disables DetectionPP.", 0, 1)
+local DPP_Enabled = CreateConVar("detectionpp_enabled", "1", bit.bor(FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Enables/disables DetectionPP.", 0, 1)
 
 if file.Exists(FILE_NAME, "DATA") then
     local FileData = file.Read(FILE_NAME, "DATA")
@@ -61,11 +61,11 @@ end
 
 -- Checks if Player 1 has allowed Player 2 to detect Player 1's entities.
 function DetectionPP.Player1AllowsPlayer2(Player1, Player2)
-    if not IsValid(Player1) then return false end
-    if not IsValid(Player2) then return false end
-
     -- Global enabled/disabled
     if not DPP_Enabled:GetBool() then return true end
+
+    if not IsValid(Player1) then return false end
+    if not IsValid(Player2) then return false end
 
     -- The players checking itself
     if Player1 == Player2 then return true end

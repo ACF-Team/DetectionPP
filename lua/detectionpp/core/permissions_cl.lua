@@ -8,6 +8,8 @@ function DetectionPP.RequestFriends(Callback)
     net.SendToServer()
 end
 
+local DPP_Enabled = CreateConVar("detectionpp_enabled", "1", bit.bor(FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Enables/disables DetectionPP.", 0, 1)
+
 function DetectionPP.UpdateFriends(FriendsChanges)
     local Friends = {}
     for _, SearchPlayer in player.Iterator() do
@@ -42,10 +44,10 @@ end)
 
 -- Checks if Player 1 has allowed you to detect Player 1's entities.
 function DetectionPP.PlayerAllows(Player)
-    if not IsValid(Player) then return false end
-
     -- Global enabled/disabled
     if not DPP_Enabled:GetBool() then return true end
+
+    if not IsValid(Player) then return false end
 
     -- The players checking itself
     if Player == LocalPlayer() then return true end

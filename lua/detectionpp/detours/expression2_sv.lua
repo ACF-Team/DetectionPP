@@ -7,7 +7,7 @@ timer.Simple(1, function()
             local oldOp = op
             op = function(ctx, ...)
                 local ret = oldOp(ctx, ...)
-                if IsValid(ret) and not ret:DPPICanDetect(ctx.player) then
+                if (IsValid(ret) or ret == game.GetWorld()) and not ret:DPPICanDetect(ctx.player) then
                     return NULL
                 end
                 return ret

@@ -30,7 +30,7 @@ function DetectionPP.ClientPanel(Panel)
             end
         end
 
-        Panel:Button("Apply Friends", "dpp_applyfriends")
+        Panel:Button("Apply Friends", "detectionpp_applyfriends")
     end
 end
 
@@ -38,7 +38,7 @@ function DetectionPP.GetFriendsChanges()
     return DetectionPP.FriendsChanges
 end
 
-concommand.Add("dpp_applyfriends", function() DetectionPP.UpdateFriends(DetectionPP.GetFriendsChanges()) end)
+concommand.Add("detectionpp_applyfriends", function() DetectionPP.UpdateFriends(DetectionPP.GetFriendsChanges()) end)
 
 function DetectionPP.UpdatePanelFriends(LUT)
 
