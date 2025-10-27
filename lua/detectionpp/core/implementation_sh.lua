@@ -13,6 +13,8 @@ function ENTITY:DPPIGetOwner()
         if Owner then return Owner end
     end
 
+    if not IsValid(self) then return NULL end
+
     -- Wiremod hologram support 
     local Class = ENTITY.GetClass(self)
 
