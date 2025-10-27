@@ -12,6 +12,7 @@ function DetectionPP.ClientPanel(Panel)
     txt:SetAutoStretchVertical(false)
 
     DetectionPP.FriendsChanges = {} -- Reset the table
+    DetectionPP.Checkboxes = {}
 
     local Players = player.GetAll()
     if #Players == 1 then
@@ -27,6 +28,7 @@ function DetectionPP.ClientPanel(Panel)
                     end
                 end
                 Panel:AddItem(Checkbox)
+                DetectionPP.Checkboxes[Player:SteamID64()] = Checkbox
             end
         end
 
@@ -41,7 +43,15 @@ end
 concommand.Add("detectionpp_applyfriends", function() DetectionPP.UpdateFriends(DetectionPP.GetFriendsChanges()) end)
 
 function DetectionPP.UpdatePanelFriends(LUT)
-
+    if not DetectionPP.Checkboxes then return end
+    for SteamID, State in pairs(LUT) do
+        if State then
+            local Checkbox = DetectionPP.Checkboxes[SteamID]
+            if IsValid(Checkbox) then
+                Checkbox:SetChecked(true)
+            end
+        end
+    end
 end
 
 function DetectionPP.SpawnMenuOpen()
