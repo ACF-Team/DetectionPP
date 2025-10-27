@@ -55,7 +55,7 @@ function DetectionPP.UpdatePanelFriends(LUT)
 end
 
 function DetectionPP.SpawnMenuOpen()
-    if DetectionPP.ClientCPanel then DetectionPP.ClientPanel(DetectionPP.ClientCPanel) end
+    if IsValid(DetectionPP.ClientCPanel) then DetectionPP.ClientPanel(DetectionPP.ClientCPanel) end
 end
 hook.Add("SpawnMenuOpen", "DetectionPP.SpawnMenuOpen", DetectionPP.SpawnMenuOpen)
 
