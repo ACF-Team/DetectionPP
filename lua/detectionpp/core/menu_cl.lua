@@ -22,6 +22,7 @@ function DetectionPP.ClientPanel(Panel)
             if IsValid(Player) and Player ~= LocalPlayer() then
                 local Checkbox = Panel:Add "DCheckBoxLabel"
                 Checkbox:SetText(Player:Nick())
+                Checkbox:SetDark(true)
                 function Checkbox:OnChange(Value)
                     if IsValid(Player) then
                         DetectionPP.FriendsChanges[Player:SteamID64()] = Value
