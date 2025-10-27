@@ -15,7 +15,7 @@ function DetectionPP.UpdateFriends(FriendsChanges)
     local Friends = {}
     for _, SearchPlayer in player.Iterator() do
         if IsValid(SearchPlayer) then
-            local PlayerSteamID = SearchPlayer:SteamID64()
+            local PlayerSteamID = SearchPlayer:SteamID()
             local Wishes = FriendsChanges[PlayerSteamID]
             if Wishes ~= nil then
                 Friends[#Friends + 1] = PlayerSteamID
@@ -53,7 +53,7 @@ function DetectionPP.PlayerAllows(Player)
     -- The players checking itself
     if Player == LocalPlayer() then return true end
 
-    local Player_SteamID = Player:SteamID64()
+    local Player_SteamID = Player:SteamID()
 
     return DetectionPP.PlayersWhoAllowYouToDetectThem[Player_SteamID] == true
 end

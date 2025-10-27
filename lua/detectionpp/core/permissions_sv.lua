@@ -38,7 +38,7 @@ function DetectionPP.AllowPlayer1ToDetectPlayer2(Player1, Player2)
 
     if Player1 == Player2 then return end
 
-    local Player1_SteamID, Player2_SteamID = Player1:SteamID64(), Player2:SteamID64()
+    local Player1_SteamID, Player2_SteamID = Player1:SteamID(), Player2:SteamID()
 
     DetectionPP.Permissions[Player2_SteamID] = DetectionPP.Permissions[Player2_SteamID] or {}
     DetectionPP.Permissions[Player2_SteamID][Player1_SteamID] = true
@@ -52,10 +52,10 @@ function DetectionPP.DenyPlayer1FromDetectingPlayer2(Player1, Player2)
 
     if Player1 == Player2 then return end
 
-    local Player2_SteamID = Player2:SteamID64()
+    local Player2_SteamID = Player2:SteamID()
     if not DetectionPP.Permissions[Player2_SteamID] then return end
 
-    DetectionPP.Permissions[Player2_SteamID][Player1:SteamID64()] = nil
+    DetectionPP.Permissions[Player2_SteamID][Player1:SteamID()] = nil
     DetectionPP.Save()
 end
 
@@ -70,10 +70,10 @@ function DetectionPP.Player1AllowsPlayer2(Player1, Player2)
     -- The players checking itself
     if Player1 == Player2 then return true end
 
-    local Player1_SteamID = Player1:SteamID64()
+    local Player1_SteamID = Player1:SteamID()
 
     if not DetectionPP.Permissions[Player1_SteamID] then return false end
-    return DetectionPP.Permissions[Player1_SteamID][Player2:SteamID64()] == true
+    return DetectionPP.Permissions[Player1_SteamID][Player2:SteamID()] == true
 end
 
 -- Checks if the player can detect this entity.
@@ -124,7 +124,7 @@ end
 net.Receive("DetectionPP_RefreshFriends", function(_, Player)
     if not IsValid(Player) then return end
 
-    local SteamID = Player:SteamID64()
+    local SteamID = Player:SteamID()
     local TimeRemaining = TryAllocTimeout(ALLOC_TABLE_REFRESH, SteamID)
     if TimeRemaining > 0 then
         -- DetectionPP.Notify(Player, string.format("Rate limited; cannot retrieve friends (try again in %.2f seconds)", TimeRemaining))
@@ -137,7 +137,7 @@ net.Receive("DetectionPP_RefreshFriends", function(_, Player)
     if FriendsLUT then
         for _, SearchPlayer in player.Iterator() do
             if IsValid(SearchPlayer) then
-                local PlayerSteamID = SearchPlayer:SteamID64()
+                local PlayerSteamID = SearchPlayer:SteamID()
                 if FriendsLUT[PlayerSteamID] then
                     Friends[#Friends + 1] = PlayerSteamID
                 end
@@ -156,7 +156,7 @@ local NOTIFY_GENERIC = 0
 net.Receive("DetectionPP_Friends", function(_, Player)
     if not IsValid(Player) then return end
 
-    local SteamID = Player:SteamID64()
+    local SteamID = Player:SteamID()
     local TimeRemaining = TryAllocTimeout(ALLOC_TABLE_SET, SteamID)
     if TimeRemaining > 0 then
         DetectionPP.Notify(Player, string.format("Rate limited; cannot set friends (try again in %.2f seconds)", TimeRemaining), NOTIFY_GENERIC, math.Clamp(TimeRemaining, 1.5, 200))
@@ -168,9 +168,10 @@ net.Receive("DetectionPP_Friends", function(_, Player)
     for i = 1, TotalPlayers do
         TempLookup[net.ReadString()] = net.ReadBool()
     end
+    PrintTable(TempLookup)
     for _, SearchPlayer in player.Iterator() do
         if IsValid(SearchPlayer) then
-            local PlayerSteamID = SearchPlayer:SteamID64()
+            local PlayerSteamID = SearchPlayer:SteamID()
             local Wishes = TempLookup[PlayerSteamID]
             if Wishes == true then
                 DetectionPP.AllowPlayer1ToDetectPlayer2(SearchPlayer, Player)
