@@ -41,8 +41,10 @@ function DetectionPP.UpdateFriends(FriendsChanges)
 end
 
 net.Receive("DetectionPP_Friends", function()
+    local FullUpdate = net.ReadBool()
+
     local TotalPlayers = net.ReadUInt(8)
-    local TempLookup = {}
+    local TempLookup = FullUpdate and {} or (LastLUT or {})
     for i = 1, TotalPlayers do
         TempLookup[net.ReadString()] = true
     end
