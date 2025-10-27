@@ -1,7 +1,7 @@
 DetectionPP.FriendsChanges = {}
 
 function DetectionPP.ClientPanel(Panel)
-    DetectionPP.RequestFriends(DetectionPP.UpdatePanelFriends)
+    local LastLUT = DetectionPP.RequestFriends(DetectionPP.UpdatePanelFriends)
     Panel:ClearControls()
     if not DetectionPP.ClientCPanel then DetectionPP.ClientCPanel = Panel end
     Panel:SetName("DetectionPP - Client Panel")
@@ -23,6 +23,7 @@ function DetectionPP.ClientPanel(Panel)
                 local Checkbox = vgui.Create("DCheckBoxLabel", Panel)
                 Checkbox:SetText(Player:Nick())
                 Checkbox:SetDark(true)
+                Checkbox:SetChecked(LastLUT[Player:SteamID()] == true)
                 function Checkbox:OnChange(Value)
                     if IsValid(Player) then
                         DetectionPP.FriendsChanges[Player:SteamID()] = Value

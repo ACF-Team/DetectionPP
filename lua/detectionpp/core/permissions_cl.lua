@@ -2,11 +2,12 @@ local ENTITY = FindMetaTable("Entity")
 
 local CallbackForFriends
 DetectionPP.PlayersWhoAllowYouToDetectThem = {} -- Awesome name!
-
+local LastLUT
 function DetectionPP.RequestFriends(Callback)
     CallbackForFriends = Callback
     net.Start("DetectionPP_RefreshFriends")
     net.SendToServer()
+    return LastLUT or {}
 end
 
 local DPP_Enabled = CreateConVar("detectionpp_enabled", "1", FCVAR_REPLICATED, "Enables/disables DetectionPP.", 0, 1)
@@ -41,6 +42,7 @@ net.Receive("DetectionPP_Friends", function()
         pcall(CallbackForFriends, TempLookup)
         CallbackForFriends = nil
     end
+    LastLUT = TempLookup
 end)
 
 -- Checks if Player 1 has allowed you to detect Player 1's entities.
