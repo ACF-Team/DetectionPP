@@ -62,11 +62,7 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     local function TrashTrace(Trace)
         local E = eunwrap(Trace.Entity)
         if DetectionPP.CantDetect(E, Instance.player) then
-            Trace.Entity = ewrap(NULL)
-            Trace.SurfaceFlags = 0
-            Trace.PhysicsBone = 0
-            Trace.SurfaceProps = 0
-            -- TODO: Should we be even more vague?
+            DetectionPP.DefaultTrace(Trace, ewrap(NULL))
         end
         return Trace
     end
@@ -125,8 +121,12 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     -- local function DetourPlayerMethodReturningVectorAngle(Method, Cond)  DetourMethod(Instance.Types.Player, CHECK_PLY, Method, DEFAULT_VECTOR_ANGLE, Cond) end
     -- local function DetourPlayerMethodReturningVectorVector(Method, Cond) DetourMethod(Instance.Types.Player, CHECK_PLY, Method, DEFAULT_VECTOR_VECTOR, Cond) end
     local function DetourPlayerMethodReturningBool(Method, Cond)         DetourMethod(Instance.Types.Player, CHECK_PLY, Method, DEFAULT_BOOL, Cond) end
-    local function DetourPlayerMethodReturningTrace(Method, Cond)        local Func Func = DetourMethod(Instance.Types.Player, nil, Method, nil, Cond, function(...)
-        local Trace = Func(...)
+    local function DetourPlayerMethodReturningTrace(Method, Cond)        local Func Func = DetourMethod(Instance.Types.Player, nil, Method, nil, Cond, function(self, ...)
+        if DetectionPP.CantDetect(punwrap(self), Instance.player) then
+            return {Hit = false}
+        end
+
+        local Trace = Func(self, ...)
         return TrashTrace(Trace)
     end) end
 
