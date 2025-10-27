@@ -61,6 +61,6 @@ end
 hook.Add("SpawnMenuOpen", "DetectionPP.SpawnMenuOpen", DetectionPP.SpawnMenuOpen)
 
 function DetectionPP.PopulateToolMenu()
-    spawnmenu.AddToolMenuOption("Utilities", "DetectionPP", "Client", "Client", "", "", DetectionPP.ClientPanel)
+    spawnmenu.AddToolMenuOption("Utilities", "DetectionPP", "Utilities_DetectionPP_Client", "Client", "", "", DetectionPP.ClientPanel)
 end
 hook.Add("PopulateToolMenu", "DetectionPP.PopulateToolMenu", DetectionPP.PopulateToolMenu)
