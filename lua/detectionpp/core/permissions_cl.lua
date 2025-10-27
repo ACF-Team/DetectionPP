@@ -1,5 +1,6 @@
-local CallbackForFriends
+local ENTITY = FindMetaTable("Entity")
 
+local CallbackForFriends
 DetectionPP.PlayersWhoAllowYouToDetectThem = {} -- Awesome name!
 
 function DetectionPP.RequestFriends(Callback)
