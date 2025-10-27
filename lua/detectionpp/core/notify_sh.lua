@@ -2,7 +2,9 @@ if SERVER then
     util.AddNetworkString("DetectionPP_Notify")
     function DetectionPP.Notify(Player, Text, Type, Length)
         net.Start("DetectionPP_Notify")
-
+        net.WriteString(Text)
+        net.WriteInt(Type, 5)
+        net.WriteFloat(Length)
         net.Send(Player)
     end
 else
