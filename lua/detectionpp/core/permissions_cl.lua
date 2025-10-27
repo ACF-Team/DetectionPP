@@ -8,7 +8,8 @@ function DetectionPP.RequestFriends(Callback)
     net.SendToServer()
 end
 
-local DPP_Enabled = CreateConVar("detectionpp_enabled", "1", bit.bor(FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED), "Enables/disables DetectionPP.", 0, 1)
+local DPP_Enabled = CreateConVar("detectionpp_enabled", "1", FCVAR_REPLICATED, "Enables/disables DetectionPP.", 0, 1)
+print(DPP_Enabled:GetBool())
 
 function DetectionPP.UpdateFriends(FriendsChanges)
     local Friends = {}
