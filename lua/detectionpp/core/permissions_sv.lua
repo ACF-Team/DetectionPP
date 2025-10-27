@@ -83,7 +83,7 @@ function DetectionPP.PlayerCanDetect(Player, Entity)
     if ENTITY.IsWorld(Entity) then return CAN_ALWAYS_DETECT_WORLD end
 
     -- Different type of check for players
-    if ENTITY.IsPlayer(Entity) then
+    if Entity:IsPlayer() then
         return DetectionPP.Player1AllowsPlayer2(Entity, Player)
     end
 

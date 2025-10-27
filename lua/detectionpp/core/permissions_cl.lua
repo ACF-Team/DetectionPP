@@ -10,7 +10,6 @@ function DetectionPP.RequestFriends(Callback)
 end
 
 local DPP_Enabled = CreateConVar("detectionpp_enabled", "1", FCVAR_REPLICATED, "Enables/disables DetectionPP.", 0, 1)
-print(DPP_Enabled:GetBool())
 
 function DetectionPP.UpdateFriends(FriendsChanges)
     local Friends = {}
@@ -69,7 +68,7 @@ function DetectionPP.PlayerCanDetect(Player, Entity)
     if Player ~= LocalPlayer() then return false end
 
     -- Different type of check for players
-    if ENTITY.IsPlayer(Entity) then
+    if Entity:IsPlayer() then
         return DetectionPP.PlayerAllows(Entity)
     end
 
