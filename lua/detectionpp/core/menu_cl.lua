@@ -20,7 +20,7 @@ function DetectionPP.ClientPanel(Panel)
     else
         for _, Player in pairs(Players) do
             if IsValid(Player) and Player ~= LocalPlayer() then
-                local Checkbox = Panel:Add "DCheckBoxLabel"
+                local Checkbox = vgui.Create("DCheckBoxLabel", Panel)
                 Checkbox:SetText(Player:Nick())
                 Checkbox:SetDark(true)
                 function Checkbox:OnChange(Value)
