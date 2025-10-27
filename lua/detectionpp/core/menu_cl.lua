@@ -25,11 +25,11 @@ function DetectionPP.ClientPanel(Panel)
                 Checkbox:SetDark(true)
                 function Checkbox:OnChange(Value)
                     if IsValid(Player) then
-                        DetectionPP.FriendsChanges[Player:SteamID64()] = Value
+                        DetectionPP.FriendsChanges[Player:SteamID()] = Value
                     end
                 end
                 Panel:AddItem(Checkbox)
-                DetectionPP.Checkboxes[Player:SteamID64()] = Checkbox
+                DetectionPP.Checkboxes[Player:SteamID()] = Checkbox
             end
         end
 

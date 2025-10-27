@@ -148,7 +148,7 @@ net.Receive("DetectionPP_RefreshFriends", function(_, Player)
     net.Start("DetectionPP_Friends")
     net.WriteUInt(#Friends, 8) -- There may be a future (unlikely though) where this value is no longer limited to 7 bits?
     for i = 1, #Friends do
-        net.WriteUInt64(Friends[i])
+        net.WriteString(Friends[i])
     end
     net.Send(Player)
 end)
@@ -168,7 +168,7 @@ net.Receive("DetectionPP_Friends", function(_, Player)
     for i = 1, TotalPlayers do
         TempLookup[net.ReadString()] = net.ReadBool()
     end
-    PrintTable(TempLookup)
+
     for _, SearchPlayer in player.Iterator() do
         if IsValid(SearchPlayer) then
             local PlayerSteamID = SearchPlayer:SteamID()
