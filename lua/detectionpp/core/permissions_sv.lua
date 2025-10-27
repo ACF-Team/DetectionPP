@@ -102,19 +102,17 @@ local Friends_Timeouts = {
     [ALLOC_TABLE_SET]     = {}
 }
 
-local TIME_BETWEEN_REQUESTS = 3
-
-local function TryAllocTimeout(AllocTable, SteamID)
+local function TryAllocTimeout(AllocTable, SteamID, TimePerRequest)
     local Now = CurTime()
     local Timeouts = Friends_Timeouts[AllocTable]
     -- If not allocated...
     if not Timeouts[SteamID] then
-        Timeouts[SteamID] = Now + TIME_BETWEEN_REQUESTS
+        Timeouts[SteamID] = Now + TimePerRequest
         return 0
     end
     -- If it's been long enough...
     if Now > Timeouts[SteamID] then
-        Timeouts[SteamID] = Now + TIME_BETWEEN_REQUESTS
+        Timeouts[SteamID] = Now + TimePerRequest
         return 0
     end
 
@@ -125,7 +123,7 @@ net.Receive("DetectionPP_RefreshFriends", function(_, Player)
     if not IsValid(Player) then return end
 
     local SteamID = Player:SteamID()
-    local TimeRemaining = TryAllocTimeout(ALLOC_TABLE_REFRESH, SteamID)
+    local TimeRemaining = TryAllocTimeout(ALLOC_TABLE_REFRESH, SteamID, 1)
     if TimeRemaining > 0 then
         -- DetectionPP.Notify(Player, string.format("Rate limited; cannot retrieve friends (try again in %.2f seconds)", TimeRemaining))
         -- ^^ would just get annoying
@@ -157,7 +155,7 @@ net.Receive("DetectionPP_Friends", function(_, Player)
     if not IsValid(Player) then return end
 
     local SteamID = Player:SteamID()
-    local TimeRemaining = TryAllocTimeout(ALLOC_TABLE_SET, SteamID)
+    local TimeRemaining = TryAllocTimeout(ALLOC_TABLE_SET, SteamID, 1)
     if TimeRemaining > 0 then
         DetectionPP.Notify(Player, string.format("Rate limited; cannot set friends (try again in %.2f seconds)", TimeRemaining), NOTIFY_GENERIC, math.Clamp(TimeRemaining, 1.5, 200))
         return
