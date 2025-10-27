@@ -8,14 +8,19 @@ function DPPI:GetVersion() return "1.0" end
 
 function ENTITY:DPPICanDetect(Player) return DetectionPP.PlayerCanDetect(Player, self) end
 function ENTITY:DPPIGetOwner()
-    -- For now, this method just returns what CPPIGetOwner returns. Every time we get called,
-    -- we should try to override ourselves - if we fail, return NULL. The only reason this exists is
-    -- to allow ourselves to decouple if need be.
     if ENTITY.CPPIGetOwner then
-        ENTITY.DPPIGetOwner = ENTITY.CPPIGetOwner
-        -- ^^ then every other call will go to the CPPI implementor rather than needing a double-function call each time.
-        return ENTITY.CPPIGetOwner(self)
+        local Owner = ENTITY.CPPIGetOwner(self)
+        if Owner then return Owner end
     end
 
+    -- Wiremod hologram support 
+    local Class = ENTITY.GetClass(self)
+
+    if Class == "gmod_wire_hologram" then
+        local Owner = self:GetPlayer()
+        return Owner
+    end
+
+    -- print("NO OWNER: ", self, "\n", debug.traceback())
     return NULL
 end
