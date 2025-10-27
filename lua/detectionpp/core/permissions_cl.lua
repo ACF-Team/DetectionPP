@@ -13,6 +13,10 @@ end
 local DPP_Enabled = CreateConVar("detectionpp_enabled", "1", FCVAR_REPLICATED, "Enables/disables DetectionPP.", 0, 1)
 
 function DetectionPP.UpdateFriends(FriendsChanges)
+    if not LastLUT then -- Maintain a local version of our state
+        LastLUT = {}
+    end
+
     local Friends = {}
     for _, SearchPlayer in player.Iterator() do
         if IsValid(SearchPlayer) then
@@ -20,6 +24,9 @@ function DetectionPP.UpdateFriends(FriendsChanges)
             local Wishes = FriendsChanges[PlayerSteamID]
             if Wishes ~= nil then
                 Friends[#Friends + 1] = PlayerSteamID
+                LastLUT[PlayerSteamID] = Wishes == true
+            else
+                LastLUT[PlayerSteamID] = nil
             end
         end
     end
@@ -29,6 +36,7 @@ function DetectionPP.UpdateFriends(FriendsChanges)
         net.WriteString(Friends[I])
         net.WriteBool(FriendsChanges[Friends[I]] == true)
     end
+
     net.SendToServer()
 end
 
