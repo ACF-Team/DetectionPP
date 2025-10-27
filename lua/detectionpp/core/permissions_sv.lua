@@ -152,14 +152,14 @@ net.Receive("DetectionPP_RefreshFriends", function(_, Player)
     end
     net.Send(Player)
 end)
-
+local NOTIFY_GENERIC = 0
 net.Receive("DetectionPP_Friends", function(_, Player)
     if not IsValid(Player) then return end
 
     local SteamID = Player:SteamID64()
     local TimeRemaining = TryAllocTimeout(ALLOC_TABLE_SET, SteamID)
     if TimeRemaining > 0 then
-        DetectionPP.Notify(Player, string.format("Rate limited; cannot set friends (try again in %.2f seconds)", NOTIFY_GENERIC, TimeRemaining))
+        DetectionPP.Notify(Player, NOTIFY_GENERIC, string.format("Rate limited; cannot set friends (try again in %.2f seconds)", TimeRemaining))
         return
     end
 
