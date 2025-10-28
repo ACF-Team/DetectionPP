@@ -123,7 +123,7 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     -- local function DetourPlayerMethodReturningVectorVector(Method, Cond) DetourMethod(Instance.Types.Player, CHECK_PLY, Method, DEFAULT_VECTOR_VECTOR, Cond) end
     local function DetourPlayerMethodReturningBool(Method, Cond)         DetourMethod(Instance.Types.Player, CHECK_PLY, Method, DEFAULT_BOOL, Cond) end
     local function DetourPlayerMethodReturningTrace(Method, Cond)        local Func Func = DetourMethod(Instance.Types.Player, nil, Method, nil, Cond, function(self, ...)
-        if DetectionPP.CantDetect(punwrap(self), Instance.player) then
+        if DetectionPP.CantDetect(plyunwrap(self), Instance.player) then
             return {Hit = false}
         end
 
