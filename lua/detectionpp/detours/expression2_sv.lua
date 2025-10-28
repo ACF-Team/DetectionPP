@@ -184,3 +184,20 @@ DetourXRD("xrd:toTable()", function(Func, Scope, Args, ...)
     Args[1] = DetectionPP.DefaultTrace(Args[1], NULL)
     return Func(Scope, Args, ...)
 end)
+
+-- We need a better way to deal with the find methods in E2.
+-- Maybe we can PR something to handle this.
+
+local FindListModifiers = {"findInSphere(v, n)", "findInCone(v, v, n, n)", "findInBox(v, v)", "findByName(s)", "findByModel(s)", "findByClass(s)", }
+for _, FuncName in ipairs(FindListModifiers) do
+    local Func Func = Detours.Expression2(FuncName, function(Scope, Args, ...)
+        Func(Scope, Args, ...)
+        local Array = Scope.data.findlist
+        for I = #Array, 1, -1 do
+            if DetectionPP.CantDetect(Array[I], Scope.player) then
+                table.remove(Array, I)
+            end
+        end
+        return #Array
+    end)
+end
