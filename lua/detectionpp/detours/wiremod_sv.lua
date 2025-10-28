@@ -149,12 +149,22 @@ local function DetourWireTargetFinders()
     end)
 end
 
+local function DetourWireTriggers()
+    if scripted_ents.GetStored("gmod_wire_trigger_entity") == nil then return end
+
+    local StartTouch StartTouch = Detours.SENT("gmod_wire_trigger_entity", "StartTouch", function(self, Ent)
+        if DetectionPP.CantDetect(Ent, self:GetTriggerEntity():CPPIGetOwner()) then return end
+        StartTouch(self, Ent)
+    end)
+end
+
 local function TriggerDetourRebuild()
     Detours.WireDetoursLoaded = true
 
     DetourWireRangers()
     DetourWireHSRangers()
     DetourWireTargetFinders()
+    DetourWireTriggers()
 end
 
 DetectionPP.TriggerWireDetourRebuild = TriggerDetourRebuild
