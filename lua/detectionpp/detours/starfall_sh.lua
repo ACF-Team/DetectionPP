@@ -3,8 +3,8 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     local function DetourMethod(Type, CheckShouldDefault, Method, Default, Cond, Override)
         if Cond == false then return end
         local Func = Type.Methods[Method]
-        if ReportMissing and not Func then
-            print("DetectionPP: Starfall detour error due to missing method '" .. Method .. "'.")
+        if not Func then
+            if ReportMissing then print("DetectionPP: Starfall detour error due to missing method '" .. Method .. "'.") end
             return
         end
         Type.Methods[Method] = Override or function(self, ...)
