@@ -72,6 +72,9 @@ end
 
 -- Checks if the player can detect this entity.
 function DetectionPP.PlayerCanDetect(Player, Entity)
+    -- If clientside entity, don't really care. There isnt a good way to handle this case at the moment
+    if ENTITY.EntIndex(Entity) == -1 then return true end
+
     -- Allow everyone to detect worldspawn
     if ENTITY.IsWorld(Entity) then return true end
 
