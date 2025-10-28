@@ -304,4 +304,28 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     DetourPhysObjMethodReturningVector("localToWorldVector")
     DetourPhysObjMethodReturningVector("worldToLocal")
     DetourPhysObjMethodReturningVector("worldToLocalVector")
+
+    do
+        local function TrashArray(Array, Check)
+            for I = #Array, 1, -1 do
+                if Check(Array[I], Instance.player) then
+                    table.remove(Array, I)
+                end
+            end
+            return Array
+        end
+
+        local find_library = Instance.Libraries.find
+        local Funcs = {"all", "allPlayers", "byClass", "byModel", "byName", "closest", "inBox", "inCone", "inPVS", "inRay", "inSphere"}
+        for _, FuncName in ipairs(Funcs) do
+            local Func = find_library[FuncName]
+            find_library[FuncName] = function(...) return TrashArray(Func(...), CHECK_ENT) end
+        end
+    end
+
+    do
+        local trace_library = Instance.Libraries.trace
+        local FuncHull = trace_library.hull; function trace_library.hull(...) return TrashTrace(FuncHull(...)) end
+        local FuncLine = trace_library.line; function trace_library.line(...) return TrashTrace(FuncLine(...)) end
+    end
 end)
