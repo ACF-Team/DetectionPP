@@ -10,6 +10,7 @@ function ENTITY:DPPICanDetect(Player) return DetectionPP.PlayerCanDetect(Player,
 local ClassOverrides = {}
 
 function ClassOverrides.gmod_wire_hologram(self) return self:GetPlayer()   end
+function ClassOverrides.starfall_hologram(self) return self.SFHoloOwner or NULL end
 
 function ENTITY:DPPIGetOwner()
     if not IsValid(self) then return NULL end
@@ -19,7 +20,6 @@ function ENTITY:DPPIGetOwner()
         local Owner = ENTITY.CPPIGetOwner(self)
         if Owner then return Owner end
     end
-
 
     local Class = ENTITY.GetClass(self)
     local Func  = ClassOverrides[Class]
