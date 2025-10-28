@@ -197,6 +197,14 @@ local LoadQueue = {}
 
 hook.Add("PlayerInitialSpawn", "DetectionPP/Load", function(Player)
     LoadQueue[Player] = true
+    for _, Player2 in player.Iterator() do
+        if not IsValid(Player2) then continue end
+        if Player == Player2 then continue end
+
+        if DetectionPP.Player1AllowsPlayer2(Player, Player) then
+            DetectionPP.NotifyPlayer1DetectingPlayer2StateChange(Player, Player2, true)
+        end
+    end
 end )
 
 hook.Add("StartCommand", "DetectionPP/Load", function(Player2, Command)
