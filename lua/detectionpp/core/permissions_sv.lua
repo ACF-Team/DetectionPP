@@ -216,7 +216,7 @@ hook.Add("StartCommand", "DetectionPP/Load", function(Player2, Command)
             if Player1 == Player2 then continue end
 
             if DetectionPP.Player1AllowsPlayer2(Player1, Player2) then
-                DetectionPP.NotifyPlayer1DetectingPlayer2StateChange(Player2, Player1, true)
+                DetectionPP.NotifyPlayer1DetectingPlayer2StateChange(Player1, Player2, true)
             end
         end
     end
