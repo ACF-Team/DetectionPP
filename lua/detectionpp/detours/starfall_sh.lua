@@ -83,6 +83,7 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     local function DetourEntMethodReturningQuaternion(Method, Cond)   DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_QUATERNION, Cond) end
     local function DetourEntMethodReturningVectorAngle(Method, Cond)  DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_VECTOR_ANGLE, Cond) end
     local function DetourEntMethodReturningVectorVector(Method, Cond) DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_VECTOR_VECTOR, Cond) end
+    local function DetourEntMethodReturningBool(Method, Cond)         DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_BOOL, Cond) end
 
     -- local function DetourPhysObjMethod(Method, Cond)                      DetourMethod(Instance.Types.PhysObj, CHECK_PHY, Method, DEFAULT_NONE, Cond) end
     local function DetourPhysObjMethodReturningNil(Method, Cond)          DetourMethod(Instance.Types.PhysObj, CHECK_PHY, Method, DEFAULT_NIL, Cond) end
@@ -231,6 +232,10 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     DetourEntMethodReturningVector("getUp")
     DetourEntMethodReturningNil("getVar")
     DetourEntMethodReturningVector("getVelocity")
+    DetourEntMethodReturningNumber("getWaterLevel")
+    DetourEntMethodReturningBool("isFrozen")
+    DetourEntMethodReturningBool("isOnGround")
+    DetourEntMethodReturningBool("isPlayerHolding")
     DetourEntMethodReturningEntity("isWeldedTo")
     DetourEntMethodReturningVector("localToWorld")
     DetourEntMethodReturningAngle("localToWorldAngles")
@@ -292,6 +297,7 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     DetourPhysObjMethodReturningVector("getVelocity")
     DetourPhysObjMethodReturningVector("getVelocityAtPoint")
     DetourPhysObjMethodReturningNil("getVolume")
+    DetourPhysObjMethodReturningBool("hasGameFlags")
     DetourPhysObjMethodReturningBool("isAsleep")
     DetourPhysObjMethodReturningBool("isMoveable")
     DetourPhysObjMethodReturningVector("localToWorld")
