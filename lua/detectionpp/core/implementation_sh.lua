@@ -12,12 +12,14 @@ local ClassOverrides = {}
 function ClassOverrides.gmod_wire_hologram(self) return self:GetPlayer()   end
 
 function ENTITY:DPPIGetOwner()
+    if not IsValid(self) then return NULL end
+    if self:IsWeapon() then return self:GetOwner() end
+
     if ENTITY.CPPIGetOwner then
         local Owner = ENTITY.CPPIGetOwner(self)
         if Owner then return Owner end
     end
 
-    if not IsValid(self) then return NULL end
 
     local Class = ENTITY.GetClass(self)
     local Func  = ClassOverrides[Class]
