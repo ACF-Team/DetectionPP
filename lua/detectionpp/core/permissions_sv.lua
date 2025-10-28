@@ -32,6 +32,13 @@ end
 -- These function names are lengthy, but mostly used internally, and I feel like
 -- length but easy to understand is more important than trying to find a smipler name for now.
 
+function DetectionPP.NotifyPlayer1DetectingPlayer2StateChange(Player1, Player2, State)
+    net.Start("DetectionPP_AllowedUpdate")
+    net.WriteString(Player2:SteamID())
+    net.WriteBool(State)
+    net.Send(Player1)
+end
+
 function DetectionPP.AllowPlayer1ToDetectPlayer2(Player1, Player2)
     if not IsValid(Player1) then return end
     if not IsValid(Player2) then return end
@@ -43,6 +50,8 @@ function DetectionPP.AllowPlayer1ToDetectPlayer2(Player1, Player2)
     DetectionPP.Permissions[Player2_SteamID] = DetectionPP.Permissions[Player2_SteamID] or {}
     DetectionPP.Permissions[Player2_SteamID][Player1_SteamID] = true
     DetectionPP.Save()
+
+    DetectionPP.NotifyPlayer1DetectingPlayer2StateChange(Player1, Player2, true)
 end
 
 -- Denies Player 1 from detecting Player 2.
@@ -57,6 +66,8 @@ function DetectionPP.DenyPlayer1FromDetectingPlayer2(Player1, Player2)
 
     DetectionPP.Permissions[Player2_SteamID][Player1:SteamID()] = nil
     DetectionPP.Save()
+
+    DetectionPP.NotifyPlayer1DetectingPlayer2StateChange(Player1, Player2, false)
 end
 
 -- Checks if Player 1 has allowed Player 2 to detect Player 1's entities.
@@ -144,6 +155,7 @@ net.Receive("DetectionPP_RefreshFriends", function(_, Player)
     end
 
     net.Start("DetectionPP_Friends")
+    net.WriteBool(true)
     net.WriteUInt(#Friends, 8) -- There may be a future (unlikely though) where this value is no longer limited to 7 bits?
     for i = 1, #Friends do
         net.WriteString(Friends[i])
@@ -179,4 +191,25 @@ net.Receive("DetectionPP_Friends", function(_, Player)
         end
     end
     DetectionPP.Notify(Player, "Friends applied!", NOTIFY_GENERIC, 5)
+end)
+
+local LoadQueue = {}
+
+hook.Add("PlayerInitialSpawn", "DetectionPP/Load", function(Player)
+    LoadQueue[Player] = true
+end )
+
+hook.Add("StartCommand", "DetectionPP/Load", function(Player2, Command)
+    if LoadQueue[Player2] and not Command:IsForced() then
+        LoadQueue[Player2] = nil
+
+        for _, Player1 in player.Iterator() do
+            if not IsValid(Player1) then continue end
+            if Player1 == Player2 then continue end
+
+            if DetectionPP.Player1AllowsPlayer2(Player2, Player1) then
+                DetectionPP.NotifyPlayer1DetectingPlayer2StateChange(Player1, Player2, true)
+            end
+        end
+    end
 end)
