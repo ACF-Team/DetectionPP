@@ -76,8 +76,12 @@ function DetectionPP.PlayerCanDetect(Player, Entity)
     if ENTITY.IsWorld(Entity) then return true end
 
     -- Information about whether other players can detect other players isnt networked. Just bail
-    -- if this is the case.
-    if Player ~= LocalPlayer() then return false end
+    -- if this is the case. TODO: IS TRUE THE RIGHT VALUE. We previously returned false (assume worst case), but
+    -- this was causing issues with clientside starfalls... say player 1 creates a CL hologram, tries to set it to a position
+    -- that they verifiably can set, but player 2 gets this same starfall code and can't see it move, since we bailed out early here.
+    -- The possibility is that Player 1 could make the attempt, player 2 could make the actual call, network over server -> player 1, boom,
+    -- bypass... maybe we need to network the full state after all of who can detect who...
+    if Player ~= LocalPlayer() then return true end
 
     -- Different type of check for players
     if Entity:IsPlayer() then
