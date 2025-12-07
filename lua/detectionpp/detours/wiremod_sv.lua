@@ -48,12 +48,12 @@ local function DetourWireTargetFinders()
     -- So this is just the logic for thinking ripped straight from Wiremod. I don't trust that enough servers will have an updated version
     --  of Wiremod in the future if we were to get this rewritten/add a hook, so this will have to do for now.
 
-    local BaseClass = baseclass.Get "base_wire_entity"
+    local BaseClass = baseclass.Get("base_wire_entity")
     local function CheckPaintTarget(self, i)
         if (self.PaintTarget) then self:TargetPainter(self.SelectedTargets[i], true) end
     end
 
-    Detours.SENT("gmod_wire_hsranger", "Think", function(self)
+    Detours.SENT("gmod_wire_target_finder", "Think", function(self)
         BaseClass.Think(self)
         if not (self.Inputs.Hold and self.Inputs.Hold.Value > 0) then
             local Owner = self:GetCreator()
