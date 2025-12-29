@@ -53,6 +53,38 @@ local function DetourWireTargetFinders()
         if (self.PaintTarget) then self:TargetPainter(self.SelectedTargets[i], true) end
     end
 
+    -- Like the old FindInValue but without string.find() and for multiple values split by either a space or a comma.
+    local function isOneOf(value, values_str, case_sensitive)
+        if not isstring(value) or not isstring(values_str) then return false end
+        if values_str == "" then return true end -- why :/
+
+        if not case_sensitive then
+            value = value:lower()
+            values_str = values_str:lower()
+        end
+
+        for possible in values_str:gmatch("[^, ]+") do
+            if possible == value then return true end
+        end
+
+        return false
+    end
+
+    local function CheckPlayers(self, contact)
+        if self.NoTargetOwner and self:GetPlayer() == contact then return false end
+        if not isOneOf(contact:GetName(), self.PlayerName, self.CaseSen) then return false end
+
+        -- Check if the player's steamid/steamid64 matches the SteamIDs
+        if self.SteamName:Trim() ~= "" then
+            local contact_steamid, contact_steamid64 = contact:SteamID(), contact:SteamID64() or "multirun"
+            if not ( isOneOf(contact_steamid, self.SteamName, self.CaseSen) or isOneOf(contact_steamid64, self.SteamName, self.CaseSen) ) then
+                return false
+            end
+        end
+
+        return self:FindColor(contact) and self:CheckTheBuddyList(contact)
+    end
+
     Detours.SENT("gmod_wire_target_finder", "Think", function(self)
         BaseClass.Think(self)
         if not (self.Inputs.Hold and self.Inputs.Hold.Value > 0) then
@@ -144,7 +176,9 @@ local function DetourWireTargetFinders()
         else
             self:ShowOutput(false)
         end
+
         self:NextThink(CurTime() + 1)
+
         return true
     end)
 end
