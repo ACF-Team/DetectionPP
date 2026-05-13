@@ -7,7 +7,11 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
             if ReportMissing then print("DetectionPP: Starfall detour error due to missing method '" .. Method .. "'.") end
             return
         end
-        Type.Methods[Method] = Override or function(self, ...)
+        Type.Methods[Method] = Override and function(...)
+                return Override(Func, Default, ...)
+            end 
+            or 
+            function(self, ...)
             if CheckShouldDefault(self, Instance.player) then
                 return Default()
             end
@@ -67,7 +71,7 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
         return Trace
     end
 
-    local function DetourEntMethod(Method, Cond)                      DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_NONE, Cond) end
+    local function DetourEntMethod(Method, Cond, Override)            DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_NONE, Cond, Override) end
     local function DetourEntMethodReturningNil(Method, Cond)          DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_NIL, Cond) end
     local function DetourEntMethodReturningEmptyTable(Method, Cond)   DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_EMPTY_TABLE, Cond) end
     local function DetourEntMethodReturningNumber(Method, Cond)       DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_NUMBER, Cond) end
@@ -250,6 +254,18 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     -- also opens up exploits here (parent a holo to an entity belonging to someone who hasnt consented to detection, then use that
     -- hologram to track them instead).
     DetourEntMethod("setParent")
+    DetourEntMethod("setLocalPos", function(Func, Default, self, localPos)
+        local Ent = eunwrap(self)
+        if not IsValid(Ent) then return end
+
+        local Parent = Ent:GetParent()
+        while IsValid(Parent) do
+            if DetectionPP.CantDetect(Parent, Instance.player) then return end
+            Parent = Parent:GetParent()
+        end
+
+        return Func(self, localPos)
+    end)
     DetourEntMethodReturningVectorVector("worldSpaceAABB")
     DetourEntMethodReturningVector("worldToLocal")
     DetourEntMethodReturningAngle("worldToLocalAngles")
