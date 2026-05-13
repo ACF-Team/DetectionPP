@@ -254,7 +254,7 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     -- also opens up exploits here (parent a holo to an entity belonging to someone who hasnt consented to detection, then use that
     -- hologram to track them instead).
     DetourEntMethod("setParent")
-    DetourEntMethod("setLocalPos", function(Func, Default, self, localPos)
+    DetourEntMethod("setLocalPos", nil, function(Func, Default, self, localPos)
         local Ent = eunwrap(self)
         if not IsValid(Ent) then return end
 
