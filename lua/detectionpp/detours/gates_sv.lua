@@ -4,10 +4,10 @@ timer.Simple(0.2, function()
     local function DetourGate(GateName, Default)
         if not GateActions[GateName] then return end
         local Func Func = Detours.WireGate(GateName, function(Gate, Ent, ...)
-            if true or DetectionPP.CantDetect(Ent, Gate:CPPIGetOwner()) then
+            if DetectionPP.CantDetect(Ent, Gate:CPPIGetOwner()) then
                 return Default()
             end
-            return Func(gate, Ent, ...)
+            return Func(Gate, Ent, ...)
         end)
     end
 
