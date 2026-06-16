@@ -141,6 +141,11 @@ function DetectionPP.PlayerCanDetect(Player, Entity)
     -- Allow everyone to detect worldspawn
     if ENTITY.IsWorld(Entity) then return CAN_ALWAYS_DETECT_WORLD end
 
+    local Parent = ENTITY.GetParent(Entity)
+    if IsValid(Parent) and DetectionPP.CantDetect(Parent, Player) then
+        return false
+    end
+
     -- Different type of check for players
     if Entity:IsPlayer() then
         return DetectionPP.Player1AllowsPlayer2(Entity, Player)
