@@ -32,11 +32,57 @@ end
 -- These function names are lengthy, but mostly used internally, and I feel like
 -- length but easy to understand is more important than trying to find a smipler name for now.
 
-function DetectionPP.NotifyPlayer1DetectingPlayer2StateChange(Player1, Player2, State)
-    net.Start("DetectionPP_AllowedUpdate")
-    net.WriteString(Player2:SteamID())
+-- Broadcasts a single permission change (Owner now allows/denies Detector to detect
+-- Owner's entities) to every client, so all clients can mirror the full detection graph.
+-- See permissions_cl.lua / DetectionPP.PermissionGraph.
+function DetectionPP.BroadcastPermissionDelta(Owner, Detector, State)
+    if not IsValid(Owner) then return end
+    if not IsValid(Detector) then return end
+
+    net.Start("DetectionPP_GraphUpdate")
+    net.WriteString(Owner:SteamID())
+    net.WriteString(Detector:SteamID())
     net.WriteBool(State)
-    net.Send(Player1)
+    net.Broadcast()
+end
+
+-- Sends the full detection graph to a single client. Only rows/columns for currently
+-- online players are sent: entities owned by offline players resolve to a NULL owner
+-- clientside and are denied anyway, so there's no need to leak absent players' whitelists.
+function DetectionPP.SendFullGraph(Target)
+    if not IsValid(Target) then return end
+
+    local Online = {}
+    for _, Ply in player.Iterator() do
+        if IsValid(Ply) then Online[Ply:SteamID()] = true end
+    end
+
+    local Rows = {}
+    for OwnerSteamID in pairs(Online) do
+        local Allowed = DetectionPP.Permissions[OwnerSteamID]
+        if Allowed then
+            local Detectors = {}
+            for DetectorSteamID in pairs(Allowed) do
+                if Online[DetectorSteamID] then
+                    Detectors[#Detectors + 1] = DetectorSteamID
+                end
+            end
+            if #Detectors > 0 then
+                Rows[#Rows + 1] = {Owner = OwnerSteamID, Detectors = Detectors}
+            end
+        end
+    end
+
+    net.Start("DetectionPP_FullGraph")
+    net.WriteUInt(#Rows, 8)
+    for _, Row in ipairs(Rows) do
+        net.WriteString(Row.Owner)
+        net.WriteUInt(#Row.Detectors, 8)
+        for _, DetectorSteamID in ipairs(Row.Detectors) do
+            net.WriteString(DetectorSteamID)
+        end
+    end
+    net.Send(Target)
 end
 
 function DetectionPP.AllowPlayer1ToDetectPlayer2(Player1, Player2)
@@ -51,7 +97,8 @@ function DetectionPP.AllowPlayer1ToDetectPlayer2(Player1, Player2)
     DetectionPP.Permissions[Player2_SteamID][Player1_SteamID] = true
     DetectionPP.Save()
 
-    DetectionPP.NotifyPlayer1DetectingPlayer2StateChange(Player1, Player2, true)
+    -- Player2 is the owner, Player1 is the detector being allowed
+    DetectionPP.BroadcastPermissionDelta(Player2, Player1, true)
 end
 
 -- Denies Player 1 from detecting Player 2.
@@ -67,7 +114,8 @@ function DetectionPP.DenyPlayer1FromDetectingPlayer2(Player1, Player2)
     DetectionPP.Permissions[Player2_SteamID][Player1:SteamID()] = nil
     DetectionPP.Save()
 
-    DetectionPP.NotifyPlayer1DetectingPlayer2StateChange(Player1, Player2, false)
+    -- Player2 is the owner, Player1 is the detector being denied
+    DetectionPP.BroadcastPermissionDelta(Player2, Player1, false)
 end
 
 -- Checks if Player 1 has allowed Player 2 to detect Player 1's entities.
@@ -103,7 +151,8 @@ end
 
 util.AddNetworkString("DetectionPP_RefreshFriends")
 util.AddNetworkString("DetectionPP_Friends")
-util.AddNetworkString("DetectionPP_AllowedUpdate")
+util.AddNetworkString("DetectionPP_FullGraph")
+util.AddNetworkString("DetectionPP_GraphUpdate")
 
 -- This timeout stuff is just to avoid potential net spam
 local ALLOC_TABLE_REFRESH = 1
@@ -197,27 +246,34 @@ local LoadQueue = {}
 
 hook.Add("PlayerInitialSpawn", "DetectionPP/Load", function(Player)
     LoadQueue[Player] = true
-    for _, Player2 in player.Iterator() do
-        if not IsValid(Player2) then continue end
-        if Player == Player2 then continue end
 
-        if DetectionPP.Player1AllowsPlayer2(Player, Player2) then
-            DetectionPP.NotifyPlayer1DetectingPlayer2StateChange(Player2, Player, true)
+    -- Let existing clients learn the joining player's relationships (in both directions).
+    -- We read the stored permissions directly rather than Player1AllowsPlayer2 so that a
+    -- disabled detectionpp_enabled convar doesn't flood the graph with bogus "true" entries.
+    local JoinerSteamID = Player:SteamID()
+    for _, Other in player.Iterator() do
+        if not IsValid(Other) then continue end
+        if Other == Player then continue end
+
+        local OtherSteamID = Other:SteamID()
+
+        local JoinerRow = DetectionPP.Permissions[JoinerSteamID]
+        if JoinerRow and JoinerRow[OtherSteamID] then
+            DetectionPP.BroadcastPermissionDelta(Player, Other, true)
+        end
+
+        local OtherRow = DetectionPP.Permissions[OtherSteamID]
+        if OtherRow and OtherRow[JoinerSteamID] then
+            DetectionPP.BroadcastPermissionDelta(Other, Player, true)
         end
     end
-end )
+end)
 
-hook.Add("StartCommand", "DetectionPP/Load", function(Player2, Command)
-    if LoadQueue[Player2] and not Command:IsForced() then
-        LoadQueue[Player2] = nil
-
-        for _, Player1 in player.Iterator() do
-            if not IsValid(Player1) then continue end
-            if Player1 == Player2 then continue end
-
-            if DetectionPP.Player1AllowsPlayer2(Player1, Player2) then
-                DetectionPP.NotifyPlayer1DetectingPlayer2StateChange(Player2, Player1, true)
-            end
-        end
+hook.Add("StartCommand", "DetectionPP/Load", function(Player, Command)
+    -- Wait until the client is actually ready to receive (first non-forced command),
+    -- then hand it the full detection graph.
+    if LoadQueue[Player] and not Command:IsForced() then
+        LoadQueue[Player] = nil
+        DetectionPP.SendFullGraph(Player)
     end
 end)

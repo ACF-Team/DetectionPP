@@ -1,7 +1,6 @@
 local ENTITY = FindMetaTable("Entity")
 
 local CallbackForFriends
-DetectionPP.PlayersWhoAllowYouToDetectThem = {} -- Awesome name!
 local LastLUT
 function DetectionPP.RequestFriends(Callback)
     CallbackForFriends = Callback
@@ -55,49 +54,77 @@ net.Receive("DetectionPP_Friends", function()
     LastLUT = TempLookup
 end)
 
--- Checks if Player 1 has allowed you to detect Player 1's entities.
-function DetectionPP.PlayerAllows(Player)
+-- Clientside mirror of the server's detection graph: PermissionGraph[ownerSteamID][detectorSteamID] = true.
+-- The server sends the full graph (online players only) when we become ready (DetectionPP_FullGraph) and
+-- broadcasts a delta on every change (DetectionPP_GraphUpdate). Because we mirror the whole graph rather
+-- than just our own inbound permissions, PlayerCanDetect can be evaluated correctly for ANY detector -
+-- not just LocalPlayer - which is what other players' clientside Starfall instances need.
+DetectionPP.PermissionGraph = {}
+
+-- Checks if Owner has allowed Detector to detect Owner's entities.
+function DetectionPP.OwnerAllowsDetector(Owner, Detector)
     -- Global enabled/disabled
     if not DPP_Enabled:GetBool() then return true end
 
-    if not IsValid(Player) then return false end
+    if not IsValid(Owner) then return false end
+    if not IsValid(Detector) then return false end
 
-    -- The players checking itself
-    if Player == LocalPlayer() then return true end
+    -- A player can always detect their own entities
+    if Owner == Detector then return true end
 
-    local Player_SteamID = Player:SteamID()
-
-    return DetectionPP.PlayersWhoAllowYouToDetectThem[Player_SteamID] == true
+    local Row = DetectionPP.PermissionGraph[Owner:SteamID()]
+    return Row ~= nil and Row[Detector:SteamID()] == true
 end
 
--- Checks if the player can detect this entity.
+-- Checks if Player (the detector) can detect this entity.
 function DetectionPP.PlayerCanDetect(Player, Entity)
     -- Allow everyone to detect worldspawn
     if ENTITY.IsWorld(Entity) then return true end
 
-    -- Information about whether other players can detect other players isnt networked. Just bail
-    -- if this is the case. TODO: IS TRUE THE RIGHT VALUE. We previously returned false (assume worst case), but
-    -- this was causing issues with clientside starfalls... say player 1 creates a CL hologram, tries to set it to a position
-    -- that they verifiably can set, but player 2 gets this same starfall code and can't see it move, since we bailed out early here.
-    -- The possibility is that Player 1 could make the attempt, player 2 could make the actual call, network over server -> player 1, boom,
-    -- bypass... maybe we need to network the full state after all of who can detect who...
-    if Player ~= LocalPlayer() then return true end
-
-    -- Different type of check for players
+    -- For players, the entity itself is its own owner
     if Entity:IsPlayer() then
-        return DetectionPP.PlayerAllows(Entity)
+        return DetectionPP.OwnerAllowsDetector(Entity, Player)
     end
 
-    return DetectionPP.PlayerAllows(ENTITY.DPPIGetOwner(Entity))
+    return DetectionPP.OwnerAllowsDetector(ENTITY.DPPIGetOwner(Entity), Player)
 end
 
-net.Receive("DetectionPP_AllowedUpdate", function()
-    local Player = net.ReadString()
-    local State = net.ReadBool()
+net.Receive("DetectionPP_FullGraph", function()
+    local Graph = {}
+    local OwnerCount = net.ReadUInt(8)
+    for _ = 1, OwnerCount do
+        local OwnerSteamID = net.ReadString()
+        local Row = {}
+        local DetectorCount = net.ReadUInt(8)
+        for _ = 1, DetectorCount do
+            Row[net.ReadString()] = true
+        end
+        Graph[OwnerSteamID] = Row
+    end
+    DetectionPP.PermissionGraph = Graph
+end)
 
+net.Receive("DetectionPP_GraphUpdate", function()
+    local OwnerSteamID    = net.ReadString()
+    local DetectorSteamID = net.ReadString()
+    local State           = net.ReadBool()
+
+    local Graph = DetectionPP.PermissionGraph
     if State then
-        DetectionPP.PlayersWhoAllowYouToDetectThem[Player] = true
+        local Row = Graph[OwnerSteamID]
+        if not Row then
+            Row = {}
+            Graph[OwnerSteamID] = Row
+        end
+        Row[DetectorSteamID] = true
     else
-        DetectionPP.PlayersWhoAllowYouToDetectThem[Player] = nil
+        local Row = Graph[OwnerSteamID]
+        if Row then
+            Row[DetectorSteamID] = nil
+            -- Drop empty rows so the graph doesn't accumulate stale owners
+            if next(Row) == nil then
+                Graph[OwnerSteamID] = nil
+            end
+        end
     end
 end)
