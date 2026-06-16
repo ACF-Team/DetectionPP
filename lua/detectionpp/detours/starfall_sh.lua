@@ -9,8 +9,8 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
         end
         Type.Methods[Method] = Override and function(...)
                 return Override(Func, Default, ...)
-            end 
-            or 
+            end
+            or
             function(self, ...)
             if CheckShouldDefault(self, Instance.player) then
                 return Default()
@@ -19,7 +19,7 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
         end
         return Func
     end
-    local hologram_meta, hwrap, hunwrap = Instance.Types.Hologram, Instance.Types.Hologram.Wrap, Instance.Types.Hologram.Unwrap
+    local hologram_meta, _, hunwrap = Instance.Types.Hologram, Instance.Types.Hologram.Wrap, Instance.Types.Hologram.Unwrap
     local ewrap, eunwrap     = Instance.Types.Entity.Wrap, Instance.Types.Entity.Unwrap
     local plywrap, plyunwrap = Instance.Types.Player.Wrap, Instance.Types.Player.Unwrap
     local vehwrap, vehunwrap = Instance.Types.Vehicle.Wrap, Instance.Types.Vehicle.Unwrap
@@ -34,11 +34,9 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
         return setmetatable(q, quat_meta)
     end
     local function getholo(self)
-        local ent = hologram_meta.sf2sensitive[self]
+        local ent = hunwrap(self)
         if IsValid(ent) then
             return ent
-        else
-            SF.Throw("Entity is not valid.", 3)
         end
     end
 
@@ -100,20 +98,20 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     local function DetourEntMethodReturningBool(Method, Cond)         DetourMethod(Instance.Types.Entity, CHECK_ENT, Method, DEFAULT_BOOL, Cond) end
 
     local function DetourHoloMethod(Method, Cond, Override)            DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_NONE, Cond, Override) end
-    local function DetourHoloMethodReturningNil(Method, Cond)          DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_NIL, Cond) end
-    local function DetourHoloMethodReturningEmptyTable(Method, Cond)   DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_EMPTY_TABLE, Cond) end
-    local function DetourHoloMethodReturningNumber(Method, Cond)       DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_NUMBER, Cond) end
-    local function DetourHoloMethodReturningNeg1(Method, Cond)         DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_NEG1, Cond) end
-    local function DetourHoloMethodReturningString(Method, Cond)       DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_STRING, Cond) end
-    local function DetourHoloMethodReturningAngle(Method, Cond)        DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_ANGLE, Cond) end
-    local function DetourHoloMethodReturningVector(Method, Cond)       DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_VECTOR, Cond) end
-    local function DetourHoloMethodReturningMatrix(Method, Cond)       DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_MATRIX, Cond) end
-    local function DetourHoloMethodReturningEntity(Method, Cond)       DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_ENTITY, Cond) end
-    local function DetourHoloMethodReturningPhysObj(Method, Cond)      DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_PHYSOBJ, Cond) end
-    local function DetourHoloMethodReturningQuaternion(Method, Cond)   DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_QUATERNION, Cond) end
-    local function DetourHoloMethodReturningVectorAngle(Method, Cond)  DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_VECTOR_ANGLE, Cond) end
-    local function DetourHoloMethodReturningVectorVector(Method, Cond) DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_VECTOR_VECTOR, Cond) end
-    local function DetourHoloMethodReturningBool(Method, Cond)         DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_BOOL, Cond) end
+    -- local function DetourHoloMethodReturningNil(Method, Cond)          DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_NIL, Cond) end
+    -- local function DetourHoloMethodReturningEmptyTable(Method, Cond)   DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_EMPTY_TABLE, Cond) end
+    -- local function DetourHoloMethodReturningNumber(Method, Cond)       DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_NUMBER, Cond) end
+    -- local function DetourHoloMethodReturningNeg1(Method, Cond)         DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_NEG1, Cond) end
+    -- local function DetourHoloMethodReturningString(Method, Cond)       DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_STRING, Cond) end
+    -- local function DetourHoloMethodReturningAngle(Method, Cond)        DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_ANGLE, Cond) end
+    -- local function DetourHoloMethodReturningVector(Method, Cond)       DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_VECTOR, Cond) end
+    -- local function DetourHoloMethodReturningMatrix(Method, Cond)       DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_MATRIX, Cond) end
+    -- local function DetourHoloMethodReturningEntity(Method, Cond)       DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_ENTITY, Cond) end
+    -- local function DetourHoloMethodReturningPhysObj(Method, Cond)      DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_PHYSOBJ, Cond) end
+    -- local function DetourHoloMethodReturningQuaternion(Method, Cond)   DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_QUATERNION, Cond) end
+    -- local function DetourHoloMethodReturningVectorAngle(Method, Cond)  DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_VECTOR_ANGLE, Cond) end
+    -- local function DetourHoloMethodReturningVectorVector(Method, Cond) DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_VECTOR_VECTOR, Cond) end
+    -- local function DetourHoloMethodReturningBool(Method, Cond)         DetourMethod(Instance.Types.Hologram, CHECK_HOLO, Method, DEFAULT_BOOL, Cond) end
 
     -- local function DetourPhysObjMethod(Method, Cond)                      DetourMethod(Instance.Types.PhysObj, CHECK_PHY, Method, DEFAULT_NONE, Cond) end
     local function DetourPhysObjMethodReturningNil(Method, Cond)          DetourMethod(Instance.Types.PhysObj, CHECK_PHY, Method, DEFAULT_NIL, Cond) end
@@ -197,8 +195,8 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     -- local function DetourVehicleMethodReturningVectorVector(Method, Cond) DetourMethod(Instance.Types.Vehicle, CHECK_VEH, Method, DEFAULT_VECTOR_VECTOR, Cond) end
     local function DetourVehicleMethodReturningPlayer(Method, Cond)       DetourMethod(Instance.Types.Vehicle, CHECK_VEH, Method, DEFAULT_PLAYER, Cond) end
 
-    local function PatchSetLocalPos(Func, Default, self, localPos)
-        local Ent = eunwrap(self)
+    local function PatchSetLocalPos(Func, Default, Self, localPos)
+        local Ent = eunwrap(Self)
         if not IsValid(Ent) then return end
 
         local Parent = Ent:GetParent()
@@ -207,7 +205,21 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
             Parent = Parent:GetParent()
         end
 
-        return Func(self, localPos)
+        return Func(Self, localPos)
+    end
+
+    local function MakeSetParentPatch(GetNative)
+        return function(Func, Default, Self, ...)
+            Func(Self, ...)
+
+            local Ent = GetNative(Self)
+            if not IsValid(Ent) then return end
+
+            local Parent = Ent:GetParent()
+            if IsValid(Parent) and DetectionPP.CantDetect(Parent, Instance.player) then
+                Ent:SetParent(nil)
+            end
+        end
     end
 
     -- TODO: Check how many of these use CPPI already. Those that do can be excluded from this list.
@@ -291,7 +303,7 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     -- completely inconsistent with E2's behavior, and has caused security issues before with AdvDupe2. Very annoying problem - and 
     -- also opens up exploits here (parent a holo to an entity belonging to someone who hasnt consented to detection, then use that
     -- hologram to track them instead).
-    DetourEntMethod("setParent")
+    DetourEntMethod("setParent", nil, MakeSetParentPatch(eunwrap))
     DetourEntMethod("setLocalPos", nil, PatchSetLocalPos)
     DetourEntMethodReturningVectorVector("worldSpaceAABB")
     DetourEntMethodReturningVector("worldToLocal")
@@ -349,6 +361,7 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     DetourPhysObjMethodReturningVector("worldToLocalVector")
 
     DetourHoloMethod("setLocalPos", nil, PatchSetLocalPos)
+    DetourHoloMethod("setParent", nil, MakeSetParentPatch(getholo))
 
     do
         local function TrashArray(Array, Check)
