@@ -136,22 +136,26 @@ function DetectionPP.Player1AllowsPlayer2(Player1, Player2)
 end
 
 -- Checks if the player can detect this entity.
-local CAN_ALWAYS_DETECT_WORLD = true -- Only set to false when testing.
+local CAN_ALWAYS_DETECT_WORLD   = true -- Only set to false when testing.
+local MAX_PARENT_DEPTH          = 64
 function DetectionPP.PlayerCanDetect(Player, Entity)
     -- Allow everyone to detect worldspawn
     if ENTITY.IsWorld(Entity) then return CAN_ALWAYS_DETECT_WORLD end
 
-    local Parent = ENTITY.GetParent(Entity)
-    if IsValid(Parent) and DetectionPP.CantDetect(Parent, Player) then
-        return false
+    local Current = Entity
+    for _ = 1, MAX_PARENT_DEPTH do
+        if not IsValid(Current) then break end
+
+        -- Different type of check for players
+        local Allower = Current:IsPlayer() and Current or ENTITY.DPPIGetOwner(Current)
+        if not DetectionPP.Player1AllowsPlayer2(Allower, Player) then
+            return false
+        end
+
+        Current = ENTITY.GetParent(Current)
     end
 
-    -- Different type of check for players
-    if Entity:IsPlayer() then
-        return DetectionPP.Player1AllowsPlayer2(Entity, Player)
-    end
-
-    return DetectionPP.Player1AllowsPlayer2(ENTITY.DPPIGetOwner(Entity), Player)
+    return true
 end
 
 util.AddNetworkString("DetectionPP_RefreshFriends")
