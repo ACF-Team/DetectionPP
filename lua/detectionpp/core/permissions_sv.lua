@@ -6,7 +6,8 @@ local DPP_Enabled = CreateConVar("detectionpp_enabled", "1", bit.bor(FCVAR_ARCHI
 
 if file.Exists(FILE_NAME, "DATA") then
     local FileData = file.Read(FILE_NAME, "DATA")
-    DetectionPP.Permissions = util.JSONToTable(FileData).Permissions
+    local Config = util.JSONToTable(FileData)
+    DetectionPP.Permissions = Config and Config.Permissions
     if not DetectionPP.Permissions then
         DetectionPP.Permissions = {}
 

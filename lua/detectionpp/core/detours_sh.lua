@@ -85,7 +85,17 @@ function Detours.SENT(ClassName, MethodName, Hook)
 end
 
 function Detours.Hook(HookName, UniqueName, Hook)
-    return Detours.New("hook.GetTable[\"" .. HookName .. "\"][\"" .. UniqueName .. "\"]", Hook)
+    local Key = "hook:" .. HookName .. ":" .. UniqueName
+
+    if not Storage[Key] then
+        local Event = hook.GetTable()[HookName]
+        local Original = Event and Event[UniqueName]
+        if not Original then ErrorNoHaltWithStack("Bad hook '" .. HookName .. "', '" .. UniqueName .. "'") return end
+        Storage[Key] = Original
+    end
+
+    hook.Add(HookName, UniqueName, Hook or Storage[Key])
+    return Storage[Key]
 end
 function Detours.Metatable(MetatableName, FunctionName, Hook)
     return Detours.New("FindMetaTable(\"" .. MetatableName .. "\")[\"" .. FunctionName .. "\"]", Hook)
