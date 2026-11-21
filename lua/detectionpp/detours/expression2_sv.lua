@@ -21,7 +21,7 @@ end
 local function DetourXRD(E2Sig, Default)
     local Func Func = Detours.Expression2(E2Sig, function(Scope, Args, ...)
         local Ranger = Args[1]
-        if IsValid(Ranger.Entity) and DetectionPP.CantDetect(Ranger.Entity, Scope.player) then
+        if Ranger and IsValid(Ranger.Entity) and DetectionPP.CantDetect(Ranger.Entity, Scope.player) then
             return Default(Func, Scope, Args, ...)
         end
 
@@ -64,7 +64,6 @@ DetourE("e:aabbSize()", DetectionPP.DefaultVector)
 DetourE("e:aabbWorldMax()", DetectionPP.DefaultVector)
 DetourE("e:aabbWorldMin()", DetectionPP.DefaultVector)
 DetourE("e:aabbWorldSize()", DetectionPP.DefaultVector)
-DetourE("e:aabbWorldSize()", DetectionPP.Default)
 
 DetourE("e:aimEntity()", DetectionPP.DefaultEntity)
 DetourE("e:aimNormal()", DetectionPP.DefaultVector)
@@ -102,7 +101,7 @@ DetourE("e:getEditProperty(s)", DetectionPP.DefaultString)
 DetourE("e:getModelBoneCount()", DetectionPP.DefaultNumber)
 DetourE("e:getModelBoneIndex(s)", DetectionPP.DefaultNumber)
 DetourE("e:getModelBoneName(n)", DetectionPP.DefaultString)
-DetourE("e:getModelBones(n)", DetectionPP.DefaultE2Array)
+DetourE("e:getModelBones()", DetectionPP.DefaultE2Array)
 DetourE("e:hasConstraints(s)", DetectionPP.DefaultNumber)
 DetourE("e:hasConstraints()", DetectionPP.DefaultNumber)
 DetourE("e:hasWeapon(s)", DetectionPP.DefaultNumber)
@@ -128,7 +127,7 @@ DetourE("e:keyForward()", DetectionPP.DefaultNumber)
 DetourE("e:keyJump()", DetectionPP.DefaultNumber)
 DetourE("e:keyLeft()", DetectionPP.DefaultNumber)
 DetourE("e:keyLeftTurn()", DetectionPP.DefaultNumber)
-DetourE("e:KeyPressed(s)", DetectionPP.DefaultNumber)
+DetourE("e:keyPressed(s)", DetectionPP.DefaultNumber)
 DetourE("e:keyReload()", DetectionPP.DefaultNumber)
 DetourE("e:keyRight()", DetectionPP.DefaultNumber)
 DetourE("e:keyRightTurn()", DetectionPP.DefaultNumber)
@@ -137,7 +136,7 @@ DetourE("e:keyUse()", DetectionPP.DefaultNumber)
 DetourE("e:keyWalk()", DetectionPP.DefaultNumber)
 DetourE("e:keyZoom()", DetectionPP.DefaultNumber)
 DetourE("e:keyvalues()", DetectionPP.DefaultE2Table)
-DetourE("e:lookupAttachment()", DetectionPP.DefaultNumber)
+DetourE("e:lookupAttachment(s)", DetectionPP.DefaultNumber)
 DetourE("e:mass()", DetectionPP.DefaultNumber)
 DetourE("e:massCenter()", DetectionPP.DefaultVector)
 DetourE("e:massCenterL()", DetectionPP.DefaultVector)
@@ -159,6 +158,12 @@ DetourE("e:velAtPoint(v)", DetectionPP.DefaultVector)
 DetourE("e:velL()", DetectionPP.DefaultVector)
 DetourE("e:weapon(s)", DetectionPP.DefaultEntity)
 DetourE("e:weapons()", DetectionPP.DefaultE2Array)
+DetourE("e:weapon()", DetectionPP.DefaultEntity)
+DetourE("e:passenger()", DetectionPP.DefaultEntity)
+DetourE("e:aimBone()", DetectionPP.DefaultPhysicsObject)
+DetourE("e:getGroundEntity()", DetectionPP.DefaultEntity)
+DetourE("e:velGroundSpeed()", DetectionPP.DefaultVector)
+DetourE("e:inertia()", DetectionPP.DefaultVector)
 
 DetourB("b:angVel()", DetectionPP.DefaultAngle)
 DetourB("b:angVelVector()", DetectionPP.DefaultVector)
@@ -176,13 +181,14 @@ DetourB("b:right()", DetectionPP.DefaultVector)
 DetourB("b:up()", DetectionPP.DefaultVector)
 DetourB("b:vel()", DetectionPP.DefaultVector)
 DetourB("b:velL()", DetectionPP.DefaultVector)
+DetourB("b:inertia()", DetectionPP.DefaultVector)
 
 DetourXRD("xrd:acfEffectiveArmor()", DetectionPP.DefaultNumber)
 DetourXRD("xrd:bone()", DetectionPP.DefaultPhysicsObject)
 DetourXRD("xrd:entity()", DetectionPP.DefaultEntity)
 DetourXRD("xrd:toTable()", function(Func, Scope, Args, ...)
-    Args[1] = DetectionPP.DefaultTrace(Args[1], NULL)
-    return Func(Scope, Args, ...)
+    -- dont touch the chip's own ranger
+    return Func(Scope, {DetectionPP.DefaultTrace(table.Copy(Args[1]), NULL)}, ...)
 end)
 
 -- We need a better way to deal with the find methods in E2.
@@ -191,7 +197,9 @@ end)
 local FindListModifiers = {"findInSphere(v, n)", "findInCone(v, v, n, n)", "findInBox(v, v)", "findByName(s)", "findByModel(s)", "findByClass(s)", }
 for _, FuncName in ipairs(FindListModifiers) do
     local Func Func = Detours.Expression2(FuncName, function(Scope, Args, ...)
-        Func(Scope, Args, ...)
+        -- throttled, findlist is stale
+        if Func(Scope, Args, ...) == 0 then return 0 end
+
         local Array = Scope.data.findlist
         for I = #Array, 1, -1 do
             if DetectionPP.CantDetect(Array[I], Scope.player) then

@@ -70,6 +70,14 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     local DEFAULT_QUATERNION    = function() return qwrap{0, 0, 0, 0} end
     local DEFAULT_PHYSOBJ       = function() return pwrap(nil) end
     local DEFAULT_BOOL          = function() return false end
+    local DEFAULT_TRACE         = function()
+        local Trace = DetectionPP.DefaultTrace()
+        for K, V in pairs(Trace) do
+            if isvector(V) then Trace[K] = vwrap(V) end
+        end
+        Trace.Entity = ewrap(NULL)
+        return Trace
+    end
 
     local function TrashTrace(Trace)
         local E = eunwrap(Trace.Entity)
@@ -150,12 +158,12 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     -- local function DetourPlayerMethodReturningVectorAngle(Method, Cond)  DetourMethod(Instance.Types.Player, CHECK_PLY, Method, DEFAULT_VECTOR_ANGLE, Cond) end
     -- local function DetourPlayerMethodReturningVectorVector(Method, Cond) DetourMethod(Instance.Types.Player, CHECK_PLY, Method, DEFAULT_VECTOR_VECTOR, Cond) end
     local function DetourPlayerMethodReturningBool(Method, Cond)         DetourMethod(Instance.Types.Player, CHECK_PLY, Method, DEFAULT_BOOL, Cond) end
-    local function DetourPlayerMethodReturningTrace(Method, Cond)        local Func Func = DetourMethod(Instance.Types.Player, nil, Method, nil, Cond, function(self, ...)
-        if DetectionPP.CantDetect(plyunwrap(self), Instance.player) then
-            return {Hit = false}
+    local function DetourPlayerMethodReturningTrace(Method, Cond)        DetourMethod(Instance.Types.Player, nil, Method, nil, Cond, function(Func, _, Self, ...)
+        if DetectionPP.CantDetect(plyunwrap(Self), Instance.player) then
+            return DEFAULT_TRACE()
         end
 
-        local Trace = Func(self, ...)
+        local Trace = Func(Self, ...)
         return TrashTrace(Trace)
     end) end
 
@@ -254,6 +262,7 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     DetourEntMethodReturningNil("getDTString")
     DetourEntMethodReturningNil("getDTVector")
     DetourEntMethodReturningAngle("getEyeAngles")
+    DetourEntMethodReturningVector("getInertia")
     DetourEntMethodReturningVectorVector("getEyePos")
     DetourEntMethodReturningVector("getForward")
     DetourEntMethodReturningAngle("getLocalAngles")
@@ -316,6 +325,7 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     DetourPlayerMethodReturningTrace("getEyeTrace")
     DetourPlayerMethodReturningNumber("getFOV")
     DetourPlayerMethodReturningEntity("getGroundEntity")
+    DetourPlayerMethodReturningVector("getShootPos")
     DetourPlayerMethodReturningVehicle("getVehicle")
     DetourPlayerMethodReturningEntity("getViewEntity")
     DetourPlayerMethodReturningEntity("getViewModel")
@@ -339,6 +349,7 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
     DetourPhysObjMethodReturningAngle("getAngles")
     DetourPhysObjMethodReturningVector("getAngleVelocity")
     DetourPhysObjMethodReturningEntity("getEntity")
+    DetourPhysObjMethodReturningVector("getInertia")
     DetourPhysObjMethodReturningEmptyTable("getFrictionSnapshot")
     DetourPhysObjMethodReturningVector("getLocalVelocity")
     DetourPhysObjMethodReturningNumber("getMass")
@@ -373,17 +384,38 @@ hook.Add("DetectionPPDetours_Starfall_PrePatchInstance", "StarfallChecks", funct
             return Array
         end
 
+        -- Filter callbacks see every entity before we get to remove it from the result.
+        -- A tiny find.inSphere with a counting filter could locate anyone's props with that.
+        local function SafeFilter(Filter, Default)
+            return function(Ent, ...)
+                if CHECK_ENT(Ent, Instance.player) then return Default end
+                return Filter(Ent, ...)
+            end
+        end
+
+        local function WrapFilters(Default, ...)
+            local Args, Count = {...}, select("#", ...)
+            for I = 1, Count do
+                if isfunction(Args[I]) then Args[I] = SafeFilter(Args[I], Default) end
+            end
+            return unpack(Args, 1, Count)
+        end
+
+        -- closest returns one of the entities the chip passed in, not a list
         local find_library = Instance.Libraries.find
-        local Funcs = {"all", "allPlayers", "byClass", "byModel", "byName", "closest", "inBox", "inCone", "inPVS", "inRay", "inSphere"}
+        local Funcs = {"all", "allPlayers", "byClass", "byModel", "byName", "inBox", "inCone", "inPVS", "inRay", "inSphere"}
         for _, FuncName in ipairs(Funcs) do
             local Func = find_library[FuncName]
-            find_library[FuncName] = function(...) return TrashArray(Func(...), CHECK_ENT) end
+            find_library[FuncName] = function(...) return TrashArray(Func(WrapFilters(false, ...)), CHECK_ENT) end
         end
-    end
 
-    do
+        -- true = hit it, same as having no filter
         local trace_library = Instance.Libraries.trace
-        local FuncHull = trace_library.hull; function trace_library.hull(...) return TrashTrace(FuncHull(...)) end
-        local FuncLine = trace_library.line; function trace_library.line(...) return TrashTrace(FuncLine(...)) end
+        local FuncHull = trace_library.hull; function trace_library.hull(...) return TrashTrace(FuncHull(WrapFilters(true, ...))) end
+        local FuncLine = trace_library.line; function trace_library.line(...) return TrashTrace(FuncLine(WrapFilters(true, ...))) end
+
+        -- Old aliases, set before we patch
+        if trace_library.trace then trace_library.trace = trace_library.line end
+        if trace_library.traceHull then trace_library.traceHull = trace_library.hull end
     end
 end)

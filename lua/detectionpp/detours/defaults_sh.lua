@@ -12,7 +12,15 @@ function DetectionPP.DefaultTable() return {} end
 
 function DetectionPP.DefaultTrace(Trace, null)
     if not Trace then -- We are being asked to create a whole new trace
-        return {Hit = false}
+        return {
+            Hit = false, HitWorld = false, HitNonWorld = false, HitSky = false, HitNoDraw = false,
+            StartSolid = false, AllSolid = false,
+            HitPos = Vector(0, 0, 0), StartPos = Vector(0, 0, 0), HitNormal = Vector(0, 0, 0), Normal = Vector(0, 0, 0),
+            Fraction = 0, FractionLeftSolid = 0,
+            Entity = NULL,
+            HitBox = 0, HitGroup = 0, PhysicsBone = 0, MatType = 0, SurfaceProps = 0, SurfaceFlags = 0, DispFlags = 0, Contents = 0,
+            HitTexture = "",
+        }
     else -- We are just being asked to anonymize
         Trace.Entity = null
         Trace.SurfaceFlags = 0
